@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TahuBelum - Jelajahi fakta menarik dari seluruh dunia. Belajar sambil bermain dengan quiz, achievements, dan sistem XP!">
+    <meta name="keywords" content="fakta, pengetahuan, quiz, belajar, edukasi">
+    <meta name="author" content="TahuBelum">
+    <meta name="theme-color" content="#0a0a0a">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="TahuBelum - Pengetahuan Tanpa Batas">
+    <meta property="og:description" content="Temukan hal-hal menarik yang belum kamu ketahui. Dengan quiz, achievements, dan gamifikasi!">
+    <meta property="og:type" content="website">
+    
+    <title>TahuBelum ⚡ Jelajahi Pengetahuan Tanpa Batas</title>
+    
+    <!-- Favicon (emoji sebagai favicon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Preconnect untuk Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-logo">🧠</div>
+            <div class="loading-title">TahuBelum</div>
+            <div class="loading-subtitle">Memuat pengetahuan...</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="bg-animation" aria-hidden="true">
+        <div class="bg-gradient"></div>
+        <canvas id="particleCanvas"></canvas>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <div class="logo">
+                    <div class="logo-icon-wrapper" aria-hidden="true">
+                        <span class="logo-icon">🧠</span>
+                    </div>
+                    <div class="logo-text">
+                        <h1>TahuBelum</h1>
+                        <span class="logo-badge">ULTIMATE</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" id="searchToggle" title="Cari fakta (tekan /)" aria-label="Toggle search">
+                        <span>🔍</span>
+                    </button>
+                    <button class="icon-btn" id="soundToggle" title="Toggle sound" aria-label="Toggle sound">
+                        <span class="theme-icon">🔊</span>
+                    </button>
+                    <button class="icon-btn" id="themeToggle" title="Ganti tema" aria-label="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button class="icon-btn" id="quizToggle" title="Quiz mode" aria-label="Open quiz">
+                        <span>🎯</span>
+                    </button>
+                </div>
+            </div>
+            <p class="tagline">Temukan hal-hal menarik yang belum kamu ketahui ✨</p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-bar" id="searchBar" role="search">
+            <div class="search-input-wrapper">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" placeholder="Cari fakta menarik..." autocomplete="off" aria-label="Search facts">
+                <button class="search-clear" id="searchClear" aria-label="Clear search">✕</button>
+            </div>
+            <div class="search-results" id="searchResults" role="list"></div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar" role="region" aria-label="Statistics">
+            <div class="stat-item">
+                <div class="stat-icon" aria-hidden="true">📚</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalExplored">0</div>
+                    <div class="stat-label">Dieksplorasi</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon" aria-hidden="true">🔖</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalSaved">0</div>
+                    <div class="stat-label">Disimpan</div>
+                </div>
+            </div>
+            <div class="stat-item streak-item">
+                <div class="stat-icon" aria-hidden="true">🔥</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="streak">0</div>
+                    <div class="stat-label">Hari Streak</div>
+                </div>
+                <div class="streak-progress">
+                    <div class="streak-bar" id="streakBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- XP Bar (Container, will be filled by JS) -->
+        <div class="xp-bar-container" id="xpBarContainer"></div>
+
+        <!-- Category Filter -->
+        <nav class="categories" aria-label="Category filter">
+            <button class="cat-btn active" data-category="all" aria-label="All categories">
+                <span class="cat-icon" aria-hidden="true">✨</span>
+                <span class="cat-text">Semua</span>
+            </button>
+            <button class="cat-btn" data-category="sains" aria-label="Sains">
+                <span class="cat-icon" aria-hidden="true">🔬</span>
+                <span class="cat-text">Sains</span>
+            </button>
+            <button class="cat-btn" data-category="sejarah" aria-label="Sejarah">
+                <span class="cat-icon" aria-hidden="true">📜</span>
+                <span class="cat-text">Sejarah</span>
+            </button>
+            <button class="cat-btn" data-category="psikologi" aria-label="Psikologi">
+                <span class="cat-icon" aria-hidden="true">🧩</span>
+                <span class="cat-text">Psikologi</span>
+            </button>
+            <button class="cat-btn" data-category="luar-angkasa" aria-label="Luar Angkasa">
+                <span class="cat-icon" aria-hidden="true">🚀</span>
+                <span class="cat-text">Luar Angkasa</span>
+            </button>
+            <button class="cat-btn" data-category="alam" aria-label="Alam">
+                <span class="cat-icon" aria-hidden="true">🌿</span>
+                <span class="cat-text">Alam</span>
+            </button>
+            <button class="cat-btn" data-category="teknologi" aria-label="Teknologi">
+                <span class="cat-icon" aria-hidden="true">💻</span>
+                <span class="cat-text">Teknologi</span>
+            </button>
+            <button class="cat-btn" data-category="unik" aria-label="Unik">
+                <span class="cat-icon" aria-hidden="true">🎭</span>
+                <span class="cat-text">Unik</span>
+            </button>
+        </nav>
+
+        <!-- Main Card -->
+        <main class="main-card" id="mainCard" role="article">
+            <div class="card-glow" aria-hidden="true"></div>
+            <div class="card-inner">
+                <div class="card-header">
+                    <span class="category-badge" id="categoryBadge">🔬 Sains</span>
+                    <div class="card-actions">
+                        <button class="card-action-btn" id="speakBtn" title="Baca fakta (text-to-speech)" aria-label="Read fact">
+                            🔊
+                        </button>
+                        <button class="card-action-btn" id="fullscreenBtn" title="Fullscreen" aria-label="Toggle fullscreen">
+                            ⛶
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-emoji" id="cardEmoji" aria-hidden="true">🔬</div>
+                
+                <h2 class="fact-title" id="factTitle">Memuat pengetahuan...</h2>
+                <p class="fact-desc" id="factDesc">Klik tombol di bawah untuk mulai menjelajah!</p>
+                
+                <div class="card-footer">
+                    <div class="card-source" id="cardSource">
+                        <span class="source-icon" aria-hidden="true">📚</span>
+                        <span class="source-text">Sumber: -</span>
+                    </div>
+                    <div class="reading-time" id="readingTime">
+                        <span aria-hidden="true">⏱️</span>
+                        <span>1 min read</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Action Buttons -->
+        <div class="actions" role="toolbar" aria-label="Fact actions">
+            <button class="btn btn-primary" id="nextBtn" aria-label="Get next fact">
+                <span class="btn-icon" aria-hidden="true">🎲</span>
+                <span class="btn-text">Fakta Baru</span>
+                <div class="btn-shine" aria-hidden="true"></div>
+            </button>
+            <button class="btn btn-secondary" id="saveBtn" aria-label="Save fact">
+                <span class="btn-icon" aria-hidden="true">🔖</span>
+                <span class="btn-text">Simpan</span>
+            </button>
+            <button class="btn btn-ghost" id="shareBtn" aria-label="Share fact">
+                <span class="btn-icon" aria-hidden="true">📤</span>
+                <span class="btn-text">Bagikan</span>
+            </button>
+        </div>
+
+        <!-- Category Explorer (will be filled by JS) -->
+        <div id="categoryExplorerContainer"></div>
+
+        <!-- Achievements -->
+        <section class="achievements-section" id="achievementsSection" aria-label="Achievements">
+            <div class="section-header">
+                <h3>🏆 Pencapaian</h3>
+                <span class="achievement-count" id="achievementCount">0/12</span>
+            </div>
+            <div class="achievements-grid" id="achievementsGrid" role="list"></div>
+        </section>
+
+        <!-- Saved Facts -->
+        <section class="saved-section" id="savedSection" style="display:none;" aria-label="Saved facts">
+            <div class="section-header">
+                <h3>🔖 Tersimpan</h3>
+                <span class="saved-count" id="savedCount">0</span>
+            </div>
+            <div class="saved-list" id="savedList" role="list"></div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer" role="contentinfo">
+            <div class="footer-content">
+                <p class="footer-text">Dibuat dengan ❤️ untuk para pencari pengetahuan</p>
+                <div class="keyboard-hint" aria-label="Keyboard shortcuts">
+                    <kbd>Space</kbd> Fakta Baru
+                    <kbd>S</kbd> Simpan
+                    <kbd>/</kbd> Cari
+                    <kbd>Q</kbd> Quiz
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div class="modal" id="quizModal" role="dialog" aria-labelledby="quizTitle" aria-modal="true">
+        <div class="modal-content">
+            <button class="modal-close" id="quizClose" aria-label="Close quiz">✕</button>
+            <div class="quiz-header">
+                <h2 id="quizTitle">🎯 Quiz Mode</h2>
+                <p>Pilih jawaban yang benar! (30 detik per pertanyaan)</p>
+            </div>
+            <div class="quiz-content">
+                <div class="quiz-question" id="quizQuestion"></div>
+                <div class="quiz-options" id="quizOptions" role="group" aria-label="Quiz options"></div>
+                <div class="quiz-result" id="quizResult" role="alert"></div>
+                <div class="quiz-score">
+                    <span>Skor:</span>
+                    <span class="score-value" id="quizScore">0/0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Modal -->
+    <div class="modal" id="achievementModal" role="dialog" aria-labelledby="achievementTitle" aria-modal="true">
+        <div class="modal-content achievement-modal-content">
+            <div class="achievement-unlock">
+                <div class="achievement-icon-large" id="achievementIconLarge" aria-hidden="true">🏆</div>
+                <h2 id="achievementTitle">Pencapaian Terbuka!</h2>
+                <p id="achievementDesc">Deskripsi pencapaian</p>
+                <button class="btn btn-primary" id="achievementClose" aria-label="Close achievement">
+                    <span>Mantap!</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="status" aria-live="polite">
+        <span class="toast-icon" id="toastIcon" aria-hidden="true">✓</span>
+        <span id="toastMsg">Tersimpan!</span>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+    <!-- Skip to main content (accessibility) -->
+    <a href="#mainCard" class="skip-link">Skip to main content</a>
+
+    <script src="script.js"></script>
+
+    <!-- Inline styles for loading screen and extra features -->
+    <style>
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .loading-logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: loadingFloat 2s ease-in-out infinite;
+        }
+        
+        @keyframes loadingFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+        
+        .loading-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #00ff9d, #00e5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .loading-subtitle {
+            color: #a8a8a8;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+        
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #00e5ff, #d14dff);
+            background-size: 200% 100%;
+            animation: loadingProgress 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes loadingProgress {
+            0% { width: 0%; background-position: 0% 50%; }
+            50% { width: 70%; background-position: 100% 50%; }
+            100% { width: 100%; background-position: 0% 50%; }
+        }
+
+        /* Skip Link (accessibility) */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #00ff9d;
+            color: #0a0a0a;
+            padding: 8px 16px;
+            text-decoration: none;
+            z-index: 100000;
+            font-weight: 700;
+            border-radius: 0 0 8px 0;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* XP Bar Styles (add to main CSS or keep here) */
+        .xp-bar-container {
+            margin-bottom: 32px;
+            background: rgba(30, 30, 30, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 22px;
+            padding: 20px 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+        
+        .xp-bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .xp-level {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        
+        .xp-progress {
+            font-size: 13px;
+            color: #a8a8a8;
+            font-weight: 600;
+        }
+        
+        .xp-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #00e5ff, #d14dff);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.4);
+            animation: xpShine 3s ease-in-out infinite;
+        }
+        
+        @keyframes xpShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .xp-next-level {
+            font-size: 11px;
+            color: #6b6b6b;
+            font-style: italic;
+        }
+
+        /* XP Toast */
+        @keyframes xpFloat {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5); 
+                opacity: 0; 
+            }
+            20% { 
+                transform: translate(-50%, -50%) scale(1.2); 
+                opacity: 1; 
+            }
+            80% { 
+                transform: translate(-50%, -70%) scale(1); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translate(-50%, -100%) scale(0.8); 
+                opacity: 0; 
+            }
+        }
+
+        /* Quiz Timer */
+        .quiz-timer {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .timer-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: 
+                conic-gradient(#00ff9d calc(var(--percent) * 1%), rgba(255,255,255,0.1) 0);
+            display: grid;
+            place-items: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .timer-circle::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            background: #1f1f1f;
+            border-radius: 50%;
+        }
+        
+        .timer-text {
+            position: relative;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: #00ff9d;
+        }
+        
+        .quiz-timer.warning .timer-circle {
+            background: 
+                conic-gradient(#ff4757 calc(var(--percent) * 1%), rgba(255,255,255,0.1) 0);
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+        
+        .quiz-timer.warning .timer-text {
+            color: #ff4757;
+        }
+        
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Level Up Modal */
+        .level-up-modal {
+            text-align: center;
+        }
+        
+        .level-up-content {
+            padding: 20px;
+        }
+        
+        .level-up-icon {
+            font-size: 96px;
+            margin-bottom: 20px;
+            animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.5));
+        }
+        
+        .level-up-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffd700, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .level-up-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: #ffd700;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        .level-up-title {
+            font-size: 18px;
+            color: #a8a8a8;
+            margin-bottom: 28px;
+            font-style: italic;
+        }
+
+        /* History Section */
+        .history-section {
+            margin-bottom: 56px;
+            animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s backwards;
+        }
+        
+        .history-section .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .history-clear-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a8a8a8;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .history-clear-btn:hover {
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff4757;
+            border-color: #ff4757;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .history-item {
+            background: rgba(30, 30, 30, 0.65);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .history-item:hover {
+            transform: translateX(8px);
+            border-color: #00ff9d;
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.3);
+        }
+        
+        .history-emoji {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .history-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .history-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .history-time {
+            font-size: 11px;
+            color: #6b6b6b;
+            font-style: italic;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0) rotate(-25deg); opacity: 0; }
+            60% { transform: scale(1.15) rotate(8deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .loading-logo { font-size: 60px; }
+            .loading-title { font-size: 24px; }
+            .level-up-icon { font-size: 72px; }
+            .level-up-number { font-size: 36px; }
+        }
+    </style>
+
+    <script>
+        // Loading Screen Handler
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 1200);
+        });
+
+        // Sound Toggle Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            const soundBtn = document.getElementById('soundToggle');
+            const soundEnabled = localStorage.getItem('tahubelum_sound') !== 'false';
+            if (soundBtn) {
+                soundBtn.querySelector('.theme-icon').textContent = soundEnabled ? '🔊' : '🔇';
+                soundBtn.addEventListener('click', () => {
+                    if (typeof toggleSound === 'function') {
+                        toggleSound();
+                    }
+                });
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.code === 'KeyQ' && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    const quizToggle = document.getElementById('quizToggle');
+                    if (quizToggle) quizToggle.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
